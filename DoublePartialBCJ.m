@@ -336,9 +336,8 @@ DeleteCases[ret,0->0]
 MandToMP[expr_]:=expr/.Subscript[s, \[Alpha]_]:> Module[{subs}, subs=Subsets[\[Alpha],{2}];Total[2*Map[MP[q[#[[1]]],q[#[[2]]]]&,subs]]]
 
 CheckDoublePartial[n_,expr1_,expr2_]:=
-Module[{rules,minrules,minbasis,ex1,ex2},
+Module[{rules,minbasis,ex1,ex2},
 rules=RepPAnalytical[Map[q,Range[n]],0];
-minrules=Subscript[s, \[Alpha]_]:>Which[Length[\[Alpha]]==2,2*MP[q[\[Alpha][[1]]],q[\[Alpha][[2]]]],Length[\[Alpha]]==3,2*MP[q[\[Alpha][[1]]],q[\[Alpha][[2]]]]+MP[q[\[Alpha][[1]]],q[\[Alpha][[3]]]]+MP[q[\[Alpha][[2]]],q[\[Alpha][[3]]]],Length[\[Alpha]]];
 minbasis=PBasis[Map[q,Range[n]]];
 ex1=MandToMP[expr1]/.rules;
 ex2=MandToMP[expr2]/.rules;
@@ -351,4 +350,18 @@ leftPerms=Map[Join[#,{n}]&,Permutations[Range[n-1]]];
 rightPerms=Map[Join[#,{n-1}]&,Permutations[DeleteCases[Range[n],n-1]]];
 dp=Tuples[{leftPerms,rightPerms}];
 Map[CheckDoublePartial[n,m[#[[1]],#[[2]]]/.Subscript[s, \[Alpha]__]-> \!\(\*SubscriptBox[\(s\), \({\[Alpha]}\)]\),-1*TrToBCJ[#[[1]],#[[2]]]]&,dp]
+]
+
+CFTrace[\[Delta]_]:=Module[{colorfactors},
+colorfactors=Tr[Fold[NonCommutativeMultiply,Map[T[#]&,\[Delta]]]
+]]
+
+MandToPP[expr_]:=expr/.Subscript[s, \[Alpha]_]:> Module[{subs}, subs=Subsets[\[Alpha],{2}];Total[2*Map[pp[#[[1]],#[[2]]]&,subs]]]
+
+BASPartialAmp[\[Sigma]_]:=Module[{n,perms,amps},
+n=Length[\[Sigma]];
+perms=Permutations[Range[n-1]];
+perms=Map[Join[#,{n}]&,perms];
+amps=Total[Map[CFTrace[#]*FullSimplify[TrToBCJ[\[Sigma],#]]&,perms]];
+MandToPP[amps]
 ]
