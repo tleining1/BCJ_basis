@@ -36,13 +36,28 @@ RepBackward=Join[MapThread[Rule,{listP,pNew}],MapThread[Rule,{listE,eNew}],MapTh
 expr/.RepForward/.RepBackward]
 
 
-YMBCJ[\[Sigma]_]:=Module[{n},
+YMBCJ[\[Sigma]_]:=Module[{n,num},
 n=Length[\[Sigma]];
-RepP[K[n],Range[n],\[Sigma]]
+num=RepP[K[n],Range[n],\[Sigma]];
+num/.{pe[0,\[Alpha]_]-> \[Alpha]*0,pp[0,\[Alpha]_]->Which[\[Alpha]==n,1,\[Alpha]==\[Alpha],-1/(n-1)]}
 ]
 
 YMAmp[n_]:=Module[{perms},
 perms=Permutations[n-1];
 perms=Map[Join[#,{n}]&,perms];
-Total[Map[FullSimplify[BASPartialAmp[#]]*FullSimplify[YMBCJ[#]]&,perms]]
+Total[Map[BASPartialAmp[#]*YMBCJ[#]&,perms]]
+]
+
+YMPartialAmp[\[Sigma]_]:=Module[{n,perms,\[Rho]},
+\[Rho]=CycOrdering[\[Sigma]];
+n=Length[\[Sigma]];
+perms=Permutations[n-1];
+perms=Map[Join[#,{n}]&,perms];
+Total[Map[YMBCJ[#]*MandToPP[TrToBCJ[\[Rho],#]]&,perms]]
+]
+
+YMAmp2[n_]:=Module[{perms},
+perms=Permutations[n-1];
+perms=Map[Join[#,{n}]&,perms];
+Total[Map[CFTrace[#]*YMPartialAmp[#]&,perms]]
 ]
