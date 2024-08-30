@@ -39,7 +39,14 @@ expr/.RepForward/.RepBackward]
 YMBCJ[\[Sigma]_]:=Module[{n,num},
 n=Length[\[Sigma]];
 num=RepP[K[n],Range[n],\[Sigma]];
-num/.{pe[0,\[Alpha]_]-> \[Alpha]*0,pp[0,\[Alpha]_]->Which[\[Alpha]==n,1,\[Alpha]==\[Alpha],-1/(n-1)]}
+num/.{pe[0,\[Alpha]_]:> \[Alpha]*0,pp[0,\[Alpha]_]->Which[\[Alpha]==n,1,\[Alpha]==\[Alpha],-1/(n-1)]}
+]
+
+NLSMBCJ[\[Sigma]_]:=Module[{n,YM,q},
+n=Length[\[Sigma]];
+YM=YMBCJ[\[Sigma]];
+q=YM/.{pe[i_,j_]:>Which[j==n,0,j==j,pp[i,j]],ee[i_,j_]:>Which[j==n,-pp[0,i]/pp[0,n],i==n,-pp[0,j]/pp[0,n],i==i,0]};
+q/.{pp[0,\[Alpha]_]:>Which[\[Alpha]==n,1,i==i,-1/(n-1)]}
 ]
 
 YMAmp[n_]:=Module[{perms},
@@ -60,4 +67,34 @@ YMAmp2[n_]:=Module[{perms},
 perms=Permutations[n-1];
 perms=Map[Join[#,{n}]&,perms];
 Total[Map[CFTrace[#]*YMPartialAmp[#]&,perms]]
+]
+
+GRPartialAmp[\[Sigma]_]:= (*not color ordered, but a sum over all 
+permutataions up to cyclicity will give full amplitudes*)
+Module[{n,perms,bars},
+n=Length[\[Sigma]];
+perms=Permutations[n-1];
+perms=Map[Join[#,{n}]&,perms];
+bars=YMBCJ[\[Sigma]]/.{ee :> OverBar[ee],pe :> OverBar[pe]};
+Total[Map[TrToBCJ[\[Sigma],#]*bars*YMBCJ[#]&,perms]]]
+
+GRAmp[n_]:=Module[{perms},
+perms=Permutations[n-1];
+perms=Map[Join[#,{n}]&,perms];
+Total[Map[GRPartialAmp[#]&,perms]]
+]
+
+BIPartialAmp[\[Sigma]_]:= (*not color ordered, but a sum over all 
+permutataions up to cyclicity will give full amplitudes*)
+Module[{n,perms,bars},
+n=Length[\[Sigma]];
+perms=Permutations[n-1];
+perms=Map[Join[#,{n}]&,perms];
+bars=NLSMBCJ[\[Sigma]]/.{ee :> OverBar[ee],pe :> OverBar[pe]};
+Total[Map[TrToBCJ[\[Sigma],#]*bars*YMBCJ[#]&,perms]]]
+
+BIAmp[n_]:=Module[{perms},
+perms=Permutations[n-1];
+perms=Map[Join[#,{n}]&,perms];
+Total[Map[BIPartialAmp[#]&,perms]]
 ]
